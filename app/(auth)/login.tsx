@@ -1,29 +1,41 @@
 import React from 'react';
+import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
-import { Screen } from '@/components/Screen';
 import { LoginForm, useAuth } from '@/features/auth';
 
 export default function LoginRoute() {
   const router = useRouter();
-  const { requestOtp, loading, error } = useAuth();
+  const { loginWithCredentials, loading, error } = useAuth();
 
-  const handlePhoneSubmit = async (phone: string) => {
-    const ok = await requestOtp(phone);
+  const handleLogin = async (identifier: string, pass: string) => {
+    const ok = await loginWithCredentials(identifier, pass);
     if (ok) {
-      router.push({
-        pathname: '/(auth)/otp',
-        params: { phone },
-      });
+      router.replace('/(tabs)');
+    }
+  };
+
+  const handleForgotPassword = () => {
+    router.push('/(auth)/otp');
+  };
+
+  const handleSocialSignIn = async () => {
+    const ok = await loginWithCredentials('milan.sharma@baralahospital.com', 'demoPass123');
+    if (ok) {
+      router.replace('/(tabs)');
     }
   };
 
   return (
-    <Screen>
+    <>
+      <StatusBar style="dark" />
       <LoginForm
-        onSubmitPhone={handlePhoneSubmit}
+        onLoginSubmit={handleLogin}
+        onForgotPassword={handleForgotPassword}
+        onGoogleSignIn={handleSocialSignIn}
+        onAppleSignIn={handleSocialSignIn}
         loading={loading}
         error={error}
       />
-    </Screen>
+    </>
   );
 }

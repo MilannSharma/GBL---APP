@@ -15,5 +15,11 @@ export const otpSchema = z.object({
     .regex(/^[0-9]+$/, 'OTP must contain only digits'),
 });
 
+export const loginSchema = z.object({
+  identifier: z.string().min(3, 'Please enter your mobile number, username, or email'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
 export type PhoneFormValues = z.infer<typeof phoneSchema>;
 export type OtpFormValues = z.infer<typeof otpSchema>;
+export type LoginFormValues = z.infer<typeof loginSchema>;
