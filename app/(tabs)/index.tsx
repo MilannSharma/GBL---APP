@@ -1,50 +1,22 @@
 import React from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Screen } from '@/components/Screen';
-import { Header } from '@/components/Header';
-import { LoadingView } from '@/components/LoadingView';
-import { EmptyState } from '@/components/EmptyState';
-import { VisitCard, useTodayVisits } from '@/features/visits';
-import { spacing } from '@/core/theme/spacing';
+import { HomeDashboard, useTodayVisits } from '@/features/visits';
 
 export default function HomeRoute() {
-  const router = useRouter();
   const { visits, isLoading, refetch } = useTodayVisits();
 
+  const visitedCount = visits.filter((v) => v.status === 'completed').length;
+  const totalVisits = visits.length;
+
   return (
-    <Screen scrollable={false}>
-      <Header title="Today's Schedule" />
-      {isLoading ? (
-        <LoadingView message="Loading your schedule..." />
-      ) : visits.length === 0 ? (
-        <EmptyState
-          title="No Visits Today"
-          description="You have no assigned visits scheduled for today."
-          actionTitle="Refresh"
-          onAction={refetch}
-        />
-      ) : (
-        <FlatList
-          data={visits}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <VisitCard
-              visit={item}
-              onPress={() => router.push(`/visit/${item.id}`)}
-            />
-          )}
-          contentContainerStyle={styles.list}
-          onRefresh={refetch}
-          refreshing={isLoading}
-        />
-      )}
-    </Screen>
+    <HomeDashboard
+      userName="Sajibur Rahman"
+      visitedCount={visitedCount}
+      totalVisits={totalVisits}
+      isLoading={isLoading}
+      onRefresh={async () => {
+        await refetch();
+      }}
+    />
   );
 }
 
-const styles = StyleSheet.create({
-  list: {
-    padding: spacing.screenPadding,
-  },
-});
