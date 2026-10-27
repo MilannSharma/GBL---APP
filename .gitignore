@@ -1,0 +1,49 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Expo & Builds
+.expo/
+dist/
+web-build/
+*.tsbuildinfo
+
+# Native build artifacts (for bare/prebuild workflows)
+android/app/build/
+android/.gradle/
+ios/build/
+ios/Pods/
+
+# Environment variables & secrets (per AGENTS.md Section 6 & 10)
+.env
+.env.*
+!.env.example
+*.env.local
+
+# Keystores, certs & cloud credentials
+*.jks
+*.keystore
+*.p12
+*.p8
+*.key
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+
+# EAS local artifacts
+.eas/
+
+# Logs & Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.log*
+*.log
+
+# Testing & Coverage
+coverage/
+.nyc_output/
+
+# OS metadata
+.DS_Store
+Thumbs.db
