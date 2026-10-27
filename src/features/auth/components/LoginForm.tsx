@@ -274,8 +274,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   logo: {
-    width: 175,
-    height: 96,
+    width: 205,
+    height: 112,
   },
   headerTextContainer: {
     marginBottom: 16,
