@@ -1,0 +1,5 @@
+export interface AuthState {
+  isAuthenticated: boolean;
+  token: string | null;
+  agentPhone: string | null;
+}
