@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -50,11 +49,12 @@ export function LoginForm({
   };
 
   return (
-    <ImageBackground
-      source={require('../../../../assets/login-bg.png')}
-      style={styles.backgroundImage}
-      resizeMode="cover"
-    >
+    <View style={styles.container}>
+      <Image
+        source={require('../../../../assets/login-bg.png')}
+        style={StyleSheet.absoluteFill}
+        resizeMode="cover"
+      />
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -239,15 +239,14 @@ export function LoginForm({
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  backgroundImage: {
+  container: {
     flex: 1,
-    width: '100%',
-    height: '100%',
+    backgroundColor: '#091E2A',
   },
   keyboardContainer: {
     flex: 1,

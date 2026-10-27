@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
 import * as ImagePicker from 'expo-image-picker';
-import * as Notifications from 'expo-notifications';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 
 export const permissions = {
   async requestLocationPermission(): Promise<boolean> {
@@ -23,6 +23,11 @@ export const permissions = {
 
   async requestNotificationPermission(): Promise<boolean> {
     try {
+      // Push notifications native modules are not bundled in Expo Go Android client since SDK 53
+      if (Constants.executionEnvironment === ExecutionEnvironment.StoreClient) {
+        return true;
+      }
+      const Notifications = await import('expo-notifications');
       const { status } = await Notifications.requestPermissionsAsync();
       return status === Notifications.PermissionStatus.GRANTED;
     } catch {
@@ -30,3 +35,4 @@ export const permissions = {
     }
   },
 };
+
