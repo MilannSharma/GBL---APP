@@ -53,7 +53,7 @@ export function LoginForm({
       <Image
         source={require('../../../../assets/login-bg.png')}
         style={StyleSheet.absoluteFill}
-        resizeMode="cover"
+        resizeMode="stretch"
       />
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
@@ -246,7 +246,7 @@ export function LoginForm({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#091E2A',
+    backgroundColor: '#F0F8FD',
   },
   keyboardContainer: {
     flex: 1,
