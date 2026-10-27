@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { LoginForm, useAuth } from '@/features/auth';
@@ -26,7 +27,7 @@ export default function LoginRoute() {
   };
 
   return (
-    <>
+    <View style={styles.container}>
       <StatusBar style="dark" />
       <LoginForm
         onLoginSubmit={handleLogin}
@@ -36,6 +37,13 @@ export default function LoginRoute() {
         loading={loading}
         error={error}
       />
-    </>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
+

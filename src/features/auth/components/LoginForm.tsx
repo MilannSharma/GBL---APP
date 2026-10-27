@@ -52,7 +52,7 @@ export function LoginForm({
     <View style={styles.container}>
       <Image
         source={require('../../../../assets/login-bg.png')}
-        style={StyleSheet.absoluteFill}
+        style={styles.backgroundImage}
         resizeMode="stretch"
       />
       <KeyboardAvoidingView
@@ -248,53 +248,62 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F0F8FD',
   },
+  backgroundImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+  },
   keyboardContainer: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: Platform.OS === 'ios' ? 56 : 40,
-    paddingBottom: 32,
+    paddingTop: Platform.OS === 'ios' ? 44 : 20,
+    paddingBottom: 20,
     justifyContent: 'space-between',
   },
   logoContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
-    marginBottom: 20,
+    marginTop: 2,
+    marginBottom: 10,
   },
   logo: {
-    width: 200,
-    height: 110,
+    width: 150,
+    height: 80,
   },
   headerTextContainer: {
-    marginBottom: 24,
+    marginBottom: 16,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
     color: '#0D2646',
     letterSpacing: -0.5,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#5E718D',
-    lineHeight: 22,
+    lineHeight: 20,
     fontWeight: '400',
   },
   formContainer: {
     width: '100%',
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   inputLabel: {
     fontSize: 14,
     fontWeight: '600',
     color: '#0F172A',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -302,8 +311,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 1.2,
     borderColor: '#D4E2F4',
-    borderRadius: 16,
-    height: 54,
+    borderRadius: 14,
+    height: 50,
     paddingHorizontal: 14,
     shadowColor: '#0F6FDE',
     shadowOffset: { width: 0, height: 2 },
@@ -325,8 +334,8 @@ const styles = StyleSheet.create({
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
-    marginTop: -4,
-    marginBottom: 22,
+    marginTop: -2,
+    marginBottom: 16,
   },
   forgotPasswordText: {
     fontSize: 13,
@@ -340,7 +349,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 10,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   errorBannerText: {
     color: '#D93025',
@@ -349,20 +358,20 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   signInButton: {
-    height: 56,
-    borderRadius: 28,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: '#0E70E3',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingLeft: 20,
-    paddingRight: 10,
+    paddingRight: 8,
     shadowColor: '#0E70E3',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.35,
-    shadowRadius: 14,
-    elevation: 8,
-    marginBottom: 26,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 6,
+    marginBottom: 16,
   },
   buttonDisabled: {
     opacity: 0.7,
@@ -372,14 +381,14 @@ const styles = StyleSheet.create({
   },
   signInButtonText: {
     color: '#FFFFFF',
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
     textAlign: 'center',
   },
   arrowCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: '#0FB5AE',
     alignItems: 'center',
     justifyContent: 'center',
@@ -387,7 +396,7 @@ const styles = StyleSheet.create({
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 14,
   },
   dividerLine: {
     flex: 1,
@@ -407,9 +416,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 1.2,
     borderColor: '#D4E2F4',
-    height: 52,
-    borderRadius: 26,
-    marginBottom: 12,
+    height: 48,
+    borderRadius: 24,
+    marginBottom: 10,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
@@ -422,7 +431,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   socialButtonText: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
     color: '#0F172A',
   },
@@ -430,7 +439,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 24,
+    marginTop: 14,
   },
   shieldIcon: {
     marginRight: 8,
