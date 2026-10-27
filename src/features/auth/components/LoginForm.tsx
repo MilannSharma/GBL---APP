@@ -263,19 +263,19 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: Platform.OS === 'ios' ? 44 : 20,
+    paddingTop: Platform.OS === 'ios' ? 52 : 46,
     paddingBottom: 20,
     justifyContent: 'space-between',
   },
   logoContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 2,
+    marginTop: 6,
     marginBottom: 10,
   },
   logo: {
-    width: 150,
-    height: 80,
+    width: 175,
+    height: 96,
   },
   headerTextContainer: {
     marginBottom: 16,
