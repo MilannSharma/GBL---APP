@@ -54,16 +54,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingLeft: 14,
+    paddingRight: 20,
     paddingTop: 8,
-    paddingBottom: 8,
+    paddingBottom: 6,
   },
   logoWrapper: {
     justifyContent: 'center',
+    alignItems: 'flex-start',
   },
   logo: {
-    width: 175,
-    height: 48,
+    width: 200,
+    height: 64,
   },
   bellButton: {
     width: 44,
