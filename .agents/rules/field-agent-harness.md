@@ -16,7 +16,10 @@ This repository operates under strict Agent Harness guardrails defined in [AGENT
 Every change must follow:
 1. `INTAKE`: Ensure task file exists in `docs/08-project/tasks/TASK-<number>-<slug>.md`.
 2. `PLAN`: Detail files to touch, acceptance criteria, and risks.
-3. `APPROVAL`: Obtain human approval before starting any "risky" task (auth, DB schema/migrations, sync outbox, native config/app.config.ts, dependencies).
+3. `PLAN PRESENTATION & APPROVAL`:
+   - **Crucial Rule:** Always present the plan on a separate full document/page (using an Artifact with `RequestFeedback: true` or task markdown file).
+   - **Never** dump long plans into the sidebar/modal (`ask_question`) or clutter the chat with the plan details. Point the user to the dedicated page to review and approve.
+   - Always ask before implementing any plan.
 4. `IMPLEMENT`: Small, modular commits.
 5. `VERIFY`: Run `yarn typecheck`, `yarn lint`, and `yarn test`. Show verification evidence.
 6. `REVIEW`: Checklist pass against specs and security.

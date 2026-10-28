@@ -18,6 +18,7 @@ Docs: `docs/` (source of truth for product, features, pages, API, security)
 6. **Small, reversible changes.** One feature or screen per branch and PR. No drive-by refactors.
 7. **Do not claim done without proof.** Run the verification commands (section 8) and show the output.
 8. **Ask when unsure.** A short question is cheaper than a wrong feature.
+9. **Plans on a dedicated page.** Always present plans on a dedicated page (Artifact or task file in `docs/08-project/tasks/`). Never dump long plans in the sidebar modal (`ask_question`) or directly in chat. Always ask for user approval before implementing any plan.
 
 ---
 
@@ -42,15 +43,15 @@ One agent may play several roles in small tasks, but **review must be a separate
 
 ```
 1. INTAKE     -> task file created from template (section 2.3)
-2. PLAN       -> planner writes plan, files, risks, tests
-3. APPROVAL   -> human approves if task is "risky" (section 2.4)
+2. PLAN       -> planner writes plan, files, risks, tests on a dedicated page/Artifact
+3. APPROVAL   -> user reviews plan on dedicated page and approves before coding
 4. IMPLEMENT  -> small commits on a feature branch
 5. VERIFY     -> typecheck, lint, test, manual checks, evidence attached
 6. REVIEW     -> reviewer pass against checklist (section 9)
 7. DOCS       -> specs/ADR/changelog updated
 8. PR         -> human reviews and merges
 ```
-Never skip PLAN or VERIFY. If a step fails, go back, do not push forward.
+Never skip PLAN, dedicated page presentation, or VERIFY. If a step fails, go back, do not push forward.
 
 ### 2.3 Task file template
 
