@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Feather, Ionicons } from '@expo/vector-icons';
+import { useDaySessionStore } from '../store/useDaySessionStore';
 
 export interface HomeHeroCardProps {
   visitedCount?: number;
@@ -14,18 +15,16 @@ export interface HomeHeroCardProps {
 export function HomeHeroCard({
   visitedCount = 0,
   totalVisits = 0,
-  isDayStarted = false,
-  onToggleDay,
   onPressCard,
 }: HomeHeroCardProps) {
   const router = useRouter();
-  const [dayActive, setDayActive] = useState(isDayStarted);
+  const { isDayStarted, dayStartTime, startDay, endDay } = useDaySessionStore();
 
   const handleToggleDay = () => {
-    const nextState = !dayActive;
-    setDayActive(nextState);
-    if (onToggleDay) {
-      onToggleDay(nextState);
+    if (isDayStarted) {
+      endDay();
+    } else {
+      startDay();
     }
   };
 
@@ -77,9 +76,13 @@ export function HomeHeroCard({
       {/* Bottom row: Day status & Start Day button */}
       <View style={styles.bottomSection}>
         <View style={styles.statusLeft}>
-          <Feather name="clock" size={16} color="rgba(255, 255, 255, 0.85)" />
+          <Feather name={isDayStarted ? 'check-circle' : 'clock'} size={16} color="rgba(255, 255, 255, 0.9)" />
           <Text style={styles.statusText}>
-            {dayActive ? 'Day in progress' : 'Day not started yet'}
+            {isDayStarted
+              ? dayStartTime
+                ? `Day in progress (${dayStartTime})`
+                : 'Day in progress'
+              : 'Day not started yet'}
           </Text>
         </View>
 
@@ -87,19 +90,19 @@ export function HomeHeroCard({
           style={styles.startDayButton}
           onPress={handleToggleDay}
           accessibilityRole="button"
-          accessibilityLabel={dayActive ? 'End Day' : 'Start Day'}
+          accessibilityLabel={isDayStarted ? 'End Day' : 'Start Day'}
           activeOpacity={0.85}
         >
           <View style={styles.playCircle}>
             <Ionicons
-              name={dayActive ? 'stop' : 'play'}
+              name={isDayStarted ? 'stop' : 'play'}
               size={12}
               color="#FFFFFF"
-              style={{ marginLeft: dayActive ? 0 : 2 }}
+              style={{ marginLeft: isDayStarted ? 0 : 2 }}
             />
           </View>
           <Text style={styles.startDayText}>
-            {dayActive ? 'End Day' : 'Start Day'}
+            {isDayStarted ? 'End Day' : 'Start Day'}
           </Text>
         </TouchableOpacity>
       </View>

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
+import { useDaySessionStore } from '../store/useDaySessionStore';
 
 export interface HomeOverviewCardProps {
   visitedCount?: number;
@@ -15,6 +16,8 @@ export function HomeOverviewCard({
   isDayStarted = false,
 }: HomeOverviewCardProps) {
   const currentTime = format(new Date(), 'h:mm a');
+  const sessionDayStarted = useDaySessionStore((s) => s.isDayStarted);
+  const activeStarted = isDayStarted || sessionDayStarted;
 
   return (
     <View style={styles.cardWrapper}>
@@ -56,7 +59,7 @@ export function HomeOverviewCard({
       <View style={styles.infoBanner}>
         <Ionicons name="information-circle" size={20} color="#0E70E3" style={styles.infoIcon} />
         <Text style={styles.infoText}>
-          {isDayStarted
+          {activeStarted
             ? 'Your day is in progress.\nCheck in at assigned hospitals to log visits.'
             : "Your day hasn't started yet.\nTap 'Start Day' to begin your visits."}
         </Text>
