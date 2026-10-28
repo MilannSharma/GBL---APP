@@ -1,6 +1,7 @@
 export * from './types';
 export * from './schemas';
 export * from './api';
+export * from './store/useDaySessionStore';
 export * from './hooks/useTodayVisits';
 export * from './hooks/useHospitalVisits';
 export * from './components/VisitCard';
@@ -8,6 +9,8 @@ export * from './components/HospitalVisitCard';
 export * from './components/VisitsMetricsHeader';
 export * from './components/VisitActionModal';
 export * from './components/CreateVisitModal';
+export * from './components/StartDayGuardModal';
+export * from './components/DatePickerModal';
 export * from './components/HomeDashboard';
 export * from './components/HomeHeader';
 export * from './components/HomeWelcomeBanner';

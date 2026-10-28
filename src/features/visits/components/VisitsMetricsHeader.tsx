@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { DatePickerModal } from './DatePickerModal';
 
 export interface VisitsMetricsHeaderProps {
   visitedCount: number;
@@ -18,23 +19,23 @@ export interface VisitsMetricsHeaderProps {
   selectedDate: string;
   onSelectDate: (date: string) => void;
   isDayStarted: boolean;
-  onToggleDayStarted: () => void;
+  dayStartTime?: string;
+  onDayStatusPress: () => void;
+  statusFilter: 'all' | 'visited' | 'not_visited';
+  onSelectStatusFilter: (filter: 'all' | 'visited' | 'not_visited') => void;
   sortBy: 'time' | 'name' | 'status';
   onSelectSortBy: (sort: 'time' | 'name' | 'status') => void;
 }
 
-const AVAILABLE_DATES = [
-  'Today, 24 Nov 2025',
-  'Tomorrow, 25 Nov 2025',
-  'Yesterday, 23 Nov 2025',
-  '24 Nov 2025',
-  'All Dates',
+const FILTER_STATUS_OPTIONS: { key: 'all' | 'visited' | 'not_visited'; label: string; icon: any }[] = [
+  { key: 'all', label: 'All Visits', icon: 'apps-outline' },
+  { key: 'visited', label: 'Visited Only', icon: 'checkmark-circle-outline' },
+  { key: 'not_visited', label: 'Not Yet Visited Only', icon: 'time-outline' },
 ];
 
 const SORT_OPTIONS: { key: 'time' | 'name' | 'status'; label: string }[] = [
-  { key: 'time', label: 'Scheduled Time' },
+  { key: 'time', label: 'Scheduled Time (Earliest First)' },
   { key: 'name', label: 'Hospital Name (A-Z)' },
-  { key: 'status', label: 'Visit Status' },
 ];
 
 export function VisitsMetricsHeader({
@@ -43,14 +44,17 @@ export function VisitsMetricsHeader({
   selectedDate,
   onSelectDate,
   isDayStarted,
-  onToggleDayStarted,
+  dayStartTime,
+  onDayStatusPress,
+  statusFilter,
+  onSelectStatusFilter,
   sortBy,
   onSelectSortBy,
 }: VisitsMetricsHeaderProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [dateModalVisible, setDateModalVisible] = useState(false);
-  const [sortModalVisible, setSortModalVisible] = useState(false);
+  const [filterModalVisible, setFilterModalVisible] = useState(false);
 
   const topPadding = Platform.OS === 'android' ? Math.max(insets.top, StatusBar.currentHeight || 0) + 8 : insets.top + 6;
 
@@ -107,19 +111,19 @@ export function VisitsMetricsHeader({
         {/* Day Status Pill */}
         <TouchableOpacity
           style={[styles.dayStatusPill, isDayStarted && styles.dayStatusStarted]}
-          onPress={onToggleDayStarted}
+          onPress={onDayStatusPress}
           activeOpacity={0.75}
           accessibilityRole="button"
           accessibilityLabel="Day status"
         >
           <Ionicons
-            name="calendar-outline"
+            name={isDayStarted ? 'checkmark-circle' : 'calendar-outline'}
             size={14}
             color={isDayStarted ? '#10B981' : '#0E70E3'}
             style={styles.pillIcon}
           />
-          <Text style={[styles.dayStatusText, isDayStarted && styles.dayStatusTextStarted]}>
-            {isDayStarted ? 'Day in progress' : 'Day not started'}
+          <Text style={[styles.dayStatusText, isDayStarted && styles.dayStatusTextStarted]} numberOfLines={1}>
+            {isDayStarted ? (dayStartTime ? `Day started (${dayStartTime})` : 'Day in progress') : 'Day not started'}
           </Text>
           <Ionicons
             name="information-circle-outline"
@@ -155,96 +159,113 @@ export function VisitsMetricsHeader({
         </View>
       </View>
 
-      {/* Section Header: Hospital Visits + Sort */}
+      {/* Section Header: Hospital Visits + Sort / Filter */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Hospital Visits</Text>
+        <View style={styles.sectionTitleRow}>
+          <Text style={styles.sectionTitle}>Hospital Visits</Text>
+          {statusFilter !== 'all' && (
+            <View style={styles.activeFilterPill}>
+              <Text style={styles.activeFilterPillText}>
+                {statusFilter === 'visited' ? 'Visited' : 'Not Visited'}
+              </Text>
+            </View>
+          )}
+        </View>
+
         <TouchableOpacity
-          style={styles.sortButton}
-          onPress={() => setSortModalVisible(true)}
+          style={[styles.sortButton, statusFilter !== 'all' && styles.sortButtonActive]}
+          onPress={() => setFilterModalVisible(true)}
           activeOpacity={0.7}
           accessibilityRole="button"
-          accessibilityLabel="Sort hospital visits"
+          accessibilityLabel="Filter and Sort hospital visits"
         >
-          <Ionicons name="filter-outline" size={14} color="#0D2646" style={styles.sortIcon} />
-          <Text style={styles.sortText}>Sort</Text>
+          <Ionicons
+            name="filter"
+            size={14}
+            color={statusFilter !== 'all' ? '#0E70E3' : '#0D2646'}
+            style={styles.sortIcon}
+          />
+          <Text style={[styles.sortText, statusFilter !== 'all' && styles.sortTextActive]}>
+            {statusFilter !== 'all' ? 'Filtered' : 'Filter / Sort'}
+          </Text>
         </TouchableOpacity>
       </View>
 
-      {/* Date Picker Modal */}
-      <Modal
+      {/* Interactive Date Picker Modal */}
+      <DatePickerModal
         visible={dateModalVisible}
+        selectedDate={selectedDate}
+        onClose={() => setDateModalVisible(false)}
+        onSelectDate={onSelectDate}
+      />
+
+      {/* Filter & Sort Bottom Sheet Modal */}
+      <Modal
+        visible={filterModalVisible}
         transparent
-        animationType="fade"
-        onRequestClose={() => setDateModalVisible(false)}
+        animationType="slide"
+        onRequestClose={() => setFilterModalVisible(false)}
       >
         <TouchableOpacity
           style={styles.modalOverlay}
           activeOpacity={1}
-          onPress={() => setDateModalVisible(false)}
+          onPress={() => setFilterModalVisible(false)}
         >
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Select Filter Date</Text>
-            {AVAILABLE_DATES.map((dateStr) => {
-              const isSelected = selectedDate === dateStr || (dateStr.includes(selectedDate) && selectedDate !== 'All Dates');
+            <View style={styles.grabber} />
+            <Text style={styles.modalTitle}>Filter & Sort Visits</Text>
+
+            {/* Filter by Status */}
+            <Text style={styles.groupLabel}>Filter by Visit Status</Text>
+            {FILTER_STATUS_OPTIONS.map((opt) => {
+              const isSelected = statusFilter === opt.key;
               return (
                 <TouchableOpacity
-                  key={dateStr}
+                  key={opt.key}
                   style={[styles.modalItem, isSelected && styles.modalItemSelected]}
-                  onPress={() => {
-                    const cleanDate = dateStr.includes(',') ? dateStr.split(',')[1].trim() : dateStr;
-                    onSelectDate(cleanDate);
-                    setDateModalVisible(false);
-                  }}
+                  onPress={() => onSelectStatusFilter(opt.key)}
                 >
                   <Ionicons
-                    name="calendar-outline"
-                    size={16}
+                    name={opt.icon}
+                    size={18}
                     color={isSelected ? '#0E70E3' : '#64748B'}
                     style={styles.modalItemIcon}
                   />
                   <Text style={[styles.modalItemText, isSelected && styles.modalItemTextSelected]}>
-                    {dateStr}
+                    {opt.label}
                   </Text>
-                  {isSelected && <Ionicons name="checkmark" size={18} color="#0E70E3" />}
+                  {isSelected && <Ionicons name="checkmark-circle" size={18} color="#0E70E3" />}
                 </TouchableOpacity>
               );
             })}
-          </View>
-        </TouchableOpacity>
-      </Modal>
 
-      {/* Sort Options Modal */}
-      <Modal
-        visible={sortModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSortModalVisible(false)}
-      >
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setSortModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Sort Hospital Visits</Text>
+            <View style={styles.modalDivider} />
+
+            {/* Sort by */}
+            <Text style={styles.groupLabel}>Sort Order</Text>
             {SORT_OPTIONS.map((opt) => {
               const isSelected = sortBy === opt.key;
               return (
                 <TouchableOpacity
                   key={opt.key}
                   style={[styles.modalItem, isSelected && styles.modalItemSelected]}
-                  onPress={() => {
-                    onSelectSortBy(opt.key);
-                    setSortModalVisible(false);
-                  }}
+                  onPress={() => onSelectSortBy(opt.key)}
                 >
                   <Text style={[styles.modalItemText, isSelected && styles.modalItemTextSelected]}>
                     {opt.label}
                   </Text>
-                  {isSelected && <Ionicons name="checkmark" size={18} color="#0E70E3" />}
+                  {isSelected && <Ionicons name="checkmark-circle" size={18} color="#0E70E3" />}
                 </TouchableOpacity>
               );
             })}
+
+            <TouchableOpacity
+              style={styles.applyButton}
+              onPress={() => setFilterModalVisible(false)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.applyButtonText}>Apply Changes</Text>
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
@@ -356,7 +377,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   dayStatusPill: {
-    flex: 1,
+    flex: 1.1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#EFF6FF',
@@ -371,7 +392,7 @@ const styles = StyleSheet.create({
     borderColor: '#A7F3D0',
   },
   dayStatusText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '600',
     color: '#0E70E3',
     flex: 1,
@@ -445,18 +466,36 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 12,
   },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   sectionTitle: {
     fontSize: 19,
     fontWeight: '800',
     color: '#0D2646',
     letterSpacing: -0.3,
   },
+  activeFilterPill: {
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+  },
+  activeFilterPillText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#0E70E3',
+  },
   sortButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 7,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#EDF2F7',
@@ -466,6 +505,10 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 1,
   },
+  sortButtonActive: {
+    backgroundColor: '#EFF6FF',
+    borderColor: '#BFDBFE',
+  },
   sortIcon: {
     marginRight: 5,
   },
@@ -474,38 +517,59 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#0D2646',
   },
+  sortTextActive: {
+    color: '#0E70E3',
+  },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(13, 38, 70, 0.4)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
+    backgroundColor: 'rgba(13, 38, 70, 0.45)',
+    justifyContent: 'flex-end',
   },
   modalContainer: {
     width: '100%',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 20,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 32,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: -6 },
     shadowOpacity: 0.15,
     shadowRadius: 16,
     elevation: 8,
   },
+  grabber: {
+    width: 44,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#CBD5E1',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
   modalTitle: {
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: 19,
+    fontWeight: '800',
     color: '#0D2646',
-    marginBottom: 14,
+    marginBottom: 16,
+  },
+  groupLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748B',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginBottom: 8,
+    marginTop: 4,
   },
   modalItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    paddingVertical: 11,
     paddingHorizontal: 12,
     borderRadius: 12,
-    marginBottom: 6,
+    marginBottom: 4,
   },
   modalItemSelected: {
     backgroundColor: '#EFF6FF',
@@ -516,10 +580,28 @@ const styles = StyleSheet.create({
   modalItemText: {
     fontSize: 14,
     color: '#475569',
+    fontWeight: '500',
     flex: 1,
   },
   modalItemTextSelected: {
     color: '#0E70E3',
+    fontWeight: '700',
+  },
+  modalDivider: {
+    height: 1,
+    backgroundColor: '#EDF2F7',
+    marginVertical: 12,
+  },
+  applyButton: {
+    backgroundColor: '#0E70E3',
+    paddingVertical: 14,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginTop: 14,
+  },
+  applyButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
     fontWeight: '700',
   },
 });

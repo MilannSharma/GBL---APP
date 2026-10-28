@@ -13,6 +13,7 @@ import { HomeWelcomeBanner } from './HomeWelcomeBanner';
 import { HomeHeroCard } from './HomeHeroCard';
 import { HomeQuickActions } from './HomeQuickActions';
 import { HomeOverviewCard } from './HomeOverviewCard';
+import { useDaySessionStore } from '../store/useDaySessionStore';
 
 export interface HomeDashboardProps {
   userName?: string;
@@ -31,7 +32,7 @@ export function HomeDashboard({
 }: HomeDashboardProps) {
   const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
-  const [isDayStarted, setIsDayStarted] = useState(false);
+  const { isDayStarted, startDay, endDay } = useDaySessionStore();
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -74,7 +75,7 @@ export function HomeDashboard({
           visitedCount={visitedCount}
           totalVisits={totalVisits}
           isDayStarted={isDayStarted}
-          onToggleDay={(started) => setIsDayStarted(started)}
+          onToggleDay={(started) => (started ? startDay() : endDay())}
         />
 
         {/* Quick Actions Shortcuts */}
