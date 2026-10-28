@@ -64,8 +64,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   logo: {
-    width: 200,
-    height: 64,
+    width: 175,
+    height: 54,
   },
   bellButton: {
     width: 44,

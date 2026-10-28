@@ -20,10 +20,22 @@ export function useNotifications() {
     },
   });
 
+  const markAllReadMutation = useMutation({
+    mutationFn: () => notificationsApi.markAllAsRead(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+
+  const notifications = query.data || [];
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
   return {
-    notifications: query.data || [],
+    notifications,
+    unreadCount,
     isLoading: query.isLoading,
     markAsRead: markReadMutation.mutate,
+    markAllAsRead: markAllReadMutation.mutate,
     refetch: query.refetch,
   };
 }

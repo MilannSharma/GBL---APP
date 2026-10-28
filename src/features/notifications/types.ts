@@ -5,4 +5,7 @@ export interface AppNotification {
   type: 'visit_assigned' | 'reminder' | 'system';
   read: boolean;
   createdAt: string;
+  timeAgo?: string;
+  visitId?: string;
 }
+
