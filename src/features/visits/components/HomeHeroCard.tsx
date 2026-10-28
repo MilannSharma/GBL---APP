@@ -90,12 +90,14 @@ export function HomeHeroCard({
           accessibilityLabel={dayActive ? 'End Day' : 'Start Day'}
           activeOpacity={0.85}
         >
-          <Ionicons
-            name={dayActive ? 'stop-circle' : 'play-circle'}
-            size={22}
-            color="#0E70E3"
-            style={styles.playIcon}
-          />
+          <View style={styles.playCircle}>
+            <Ionicons
+              name={dayActive ? 'stop' : 'play'}
+              size={12}
+              color="#FFFFFF"
+              style={{ marginLeft: dayActive ? 0 : 2 }}
+            />
+          </View>
           <Text style={styles.startDayText}>
             {dayActive ? 'End Day' : 'Start Day'}
           </Text>
@@ -206,8 +208,14 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  playIcon: {
-    marginRight: 6,
+  playCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#0E70E3',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
   },
   startDayText: {
     fontSize: 14,

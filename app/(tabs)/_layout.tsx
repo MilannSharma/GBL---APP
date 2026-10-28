@@ -33,10 +33,10 @@ function FloatingTabBar({ state, navigateToTab }: FloatingTabBarProps) {
           renderIcon: () =>
             isFocused ? (
               <View style={styles.activeIconCircle}>
-                <Ionicons name="home" size={17} color="#FFFFFF" />
+                <Ionicons name="home" size={20} color="#FFFFFF" />
               </View>
             ) : (
-              <Ionicons name="home-outline" size={20} color="#94A3B8" />
+              <Ionicons name="home-outline" size={22} color="#94A3B8" />
             ),
         };
       case 'visits':
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     left: 16,
     right: 16,
     bottom: Platform.OS === 'ios' ? 24 : 14,
-    height: 68,
+    height: 72,
     borderRadius: 36,
     backgroundColor: '#FFFFFF',
     flexDirection: 'row',
@@ -241,18 +241,18 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   activeIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: '#0E70E3',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 2,
     shadowColor: '#0E70E3',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 3,
   },
   tabLabel: {
     fontSize: 11,
@@ -272,19 +272,19 @@ const styles = StyleSheet.create({
     width: 60,
   },
   centerFab: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     backgroundColor: '#0E70E3',
     alignItems: 'center',
     justifyContent: 'center',
-    top: -14,
-    borderWidth: 3.5,
+    top: -16,
+    borderWidth: 4,
     borderColor: '#FFFFFF',
     shadowColor: '#0E70E3',
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowOpacity: 0.45,
+    shadowRadius: 10,
+    elevation: 10,
   },
 });

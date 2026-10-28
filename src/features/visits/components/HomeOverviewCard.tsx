@@ -21,7 +21,7 @@ export function HomeOverviewCard({
       {/* Header Row */}
       <View style={styles.cardHeader}>
         <View style={styles.headerTitleGroup}>
-          <Ionicons name="map-outline" size={20} color="#0E70E3" style={styles.headerIcon} />
+          <Ionicons name="location-sharp" size={20} color="#0E70E3" style={styles.headerIcon} />
           <Text style={styles.headerTitle}>Today's Overview</Text>
         </View>
         <Text style={styles.headerTime}>As of {currentTime}</Text>
@@ -43,7 +43,7 @@ export function HomeOverviewCard({
         {/* Metric 2: Not Yet Visited */}
         <View style={[styles.metricBox, styles.pendingMetricBox]}>
           <View style={styles.metricIconCircleGray}>
-            <Feather name="clock" size={20} color="#64748B" />
+            <Ionicons name="time" size={20} color="#64748B" />
           </View>
           <View style={styles.metricTextCol}>
             <Text style={styles.metricNumber}>{notVisitedCount}</Text>

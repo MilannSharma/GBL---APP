@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 
 export interface QuickActionItem {
   id: string;
   title: string;
-  icon: keyof typeof Feather.glyphMap;
+  icon: keyof typeof Ionicons.glyphMap;
   iconColor: string;
   bgColor: string;
   route: string;
@@ -16,7 +16,7 @@ const DEFAULT_ACTIONS: QuickActionItem[] = [
   {
     id: 'profile',
     title: 'My\nProfile',
-    icon: 'user',
+    icon: 'person',
     iconColor: '#0E70E3',
     bgColor: '#EEF6FF',
     route: '/(tabs)/profile',
@@ -32,7 +32,7 @@ const DEFAULT_ACTIONS: QuickActionItem[] = [
   {
     id: 'reports',
     title: 'Reports\n',
-    icon: 'file-text',
+    icon: 'document-text',
     iconColor: '#059669',
     bgColor: '#EDFAF5',
     route: '/(tabs)/history',
@@ -77,7 +77,7 @@ export function HomeQuickActions() {
             activeOpacity={0.8}
           >
             <View style={styles.iconCircle}>
-              <Feather name={item.icon} size={22} color={item.iconColor} />
+              <Ionicons name={item.icon} size={20} color={item.iconColor} />
             </View>
             <Text style={styles.cardTitle}>{item.title}</Text>
           </TouchableOpacity>
@@ -116,12 +116,12 @@ const styles = StyleSheet.create({
   actionCard: {
     flex: 1,
     marginHorizontal: 4,
-    borderRadius: 20,
+    borderRadius: 22,
     paddingVertical: 14,
     paddingHorizontal: 6,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 96,
+    minHeight: 102,
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.03)',
   },
@@ -141,8 +141,8 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#1E293B',
+    fontWeight: '700',
+    color: '#0D2646',
     textAlign: 'center',
     lineHeight: 15,
   },

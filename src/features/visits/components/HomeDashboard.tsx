@@ -44,14 +44,14 @@ export function HomeDashboard({
   const notVisitedCount = Math.max(0, totalVisits - visitedCount);
 
   // Status bar offset
-  const topPadding = Platform.OS === 'android' ? Math.max(insets.top, StatusBar.currentHeight || 0) + 4 : insets.top;
+  const topPadding = Platform.OS === 'android' ? Math.max(insets.top, StatusBar.currentHeight || 0) + 12 : insets.top;
 
   return (
     <View style={styles.screenContainer}>
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingTop: topPadding, paddingBottom: 100 }, // extra space for floating bottom tab bar
+          { paddingTop: topPadding, paddingBottom: 130 }, // extra space for floating bottom tab bar
         ]}
         showsVerticalScrollIndicator={false}
         refreshControl={

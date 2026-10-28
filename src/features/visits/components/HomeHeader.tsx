@@ -27,7 +27,7 @@ export function HomeHeader({
       {/* Hospital Logo */}
       <View style={styles.logoWrapper}>
         <Image
-          source={require('../../../../assets/hospital-logo.png')}
+          source={require('../../../../assets/hospital-logo-horizontal.png')}
           style={styles.logo}
           resizeMode="contain"
           accessibilityLabel="GBL Barala Hospital Logo"
@@ -62,8 +62,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 150,
-    height: 52,
+    width: 175,
+    height: 48,
   },
   bellButton: {
     width: 44,
