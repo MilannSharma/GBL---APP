@@ -25,7 +25,7 @@ export function HomeOverviewCard({
       <View style={styles.cardHeader}>
         <View style={styles.headerTitleGroup}>
           <Ionicons name="location-sharp" size={20} color="#0E70E3" style={styles.headerIcon} />
-          <Text style={styles.headerTitle}>Today's Overview</Text>
+          <Text style={styles.headerTitle}>Today&apos;s Overview</Text>
         </View>
         <Text style={styles.headerTime}>As of {currentTime}</Text>
       </View>

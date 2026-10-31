@@ -16,8 +16,7 @@ import { Ionicons, Feather } from '@expo/vector-icons';
 export interface LoginFormProps {
   onLoginSubmit: (identifier: string, password: string) => void;
   onForgotPassword?: () => void;
-  onGoogleSignIn?: () => void;
-  onAppleSignIn?: () => void;
+  onClearError?: () => void;
   loading?: boolean;
   error?: string | null;
 }
@@ -25,8 +24,7 @@ export interface LoginFormProps {
 export function LoginForm({
   onLoginSubmit,
   onForgotPassword,
-  onGoogleSignIn,
-  onAppleSignIn,
+  onClearError,
   loading = false,
   error = null,
 }: LoginFormProps) {
@@ -34,6 +32,10 @@ export function LoginForm({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Only highlight input fields red for local validation errors, not server errors
+  const hasValidationError = Boolean(validationError);
+  const hasAnyError = Boolean(validationError || error);
 
   const handleSubmit = () => {
     if (!identifier.trim()) {
@@ -46,6 +48,18 @@ export function LoginForm({
     }
     setValidationError(null);
     onLoginSubmit(identifier.trim(), password.trim());
+  };
+
+  const handleIdentifierChange = (val: string) => {
+    setIdentifier(val);
+    if (validationError) setValidationError(null);
+    if (error && onClearError) onClearError();
+  };
+
+  const handlePasswordChange = (val: string) => {
+    setPassword(val);
+    if (validationError) setValidationError(null);
+    if (error && onClearError) onClearError();
   };
 
   return (
@@ -88,11 +102,11 @@ export function LoginForm({
               <Text style={styles.inputLabel}>
                 Mobile Number / Username / Email
               </Text>
-              <View style={styles.inputWrapper}>
+              <View style={[styles.inputWrapper, hasValidationError && styles.inputWrapperError]}>
                 <Feather
                   name="user"
                   size={20}
-                  color="#5E718D"
+                  color={hasValidationError ? '#EF4444' : '#5E718D'}
                   style={styles.inputIcon}
                 />
                 <TextInput
@@ -101,10 +115,7 @@ export function LoginForm({
                   placeholderTextColor="#94A3B8"
                   autoCapitalize="none"
                   value={identifier}
-                  onChangeText={(val) => {
-                    setIdentifier(val);
-                    if (validationError) setValidationError(null);
-                  }}
+                  onChangeText={handleIdentifierChange}
                 />
               </View>
             </View>
@@ -112,11 +123,11 @@ export function LoginForm({
             {/* Input 2: Password */}
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Password</Text>
-              <View style={styles.inputWrapper}>
+              <View style={[styles.inputWrapper, hasValidationError && styles.inputWrapperError]}>
                 <Feather
                   name="lock"
                   size={20}
-                  color="#5E718D"
+                  color={hasValidationError ? '#EF4444' : '#5E718D'}
                   style={styles.inputIcon}
                 />
                 <TextInput
@@ -125,10 +136,7 @@ export function LoginForm({
                   placeholderTextColor="#94A3B8"
                   secureTextEntry={!showPassword}
                   value={password}
-                  onChangeText={(val) => {
-                    setPassword(val);
-                    if (validationError) setValidationError(null);
-                  }}
+                  onChangeText={handlePasswordChange}
                 />
                 <TouchableOpacity
                   accessibilityRole="button"
@@ -140,7 +148,7 @@ export function LoginForm({
                   <Ionicons
                     name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                     size={22}
-                    color="#5E718D"
+                    color={hasValidationError ? '#EF4444' : '#5E718D'}
                   />
                 </TouchableOpacity>
               </View>
@@ -157,11 +165,11 @@ export function LoginForm({
               <Text style={styles.forgotPasswordText}>Forgot password?</Text>
             </TouchableOpacity>
 
-            {/* Validation / API Error */}
-            {(validationError || error) && (
-              <View style={styles.errorBanner}>
-                <Ionicons name="alert-circle-outline" size={18} color="#D93025" />
-                <Text style={styles.errorBannerText}>
+            {/* Gentle notice banner — no scary red */}
+            {hasAnyError && (
+              <View style={styles.noticeBanner}>
+                <Ionicons name="information-circle-outline" size={20} color="#B45309" style={styles.noticeIcon} />
+                <Text style={styles.noticeBannerText}>
                   {validationError || error}
                 </Text>
               </View>
@@ -185,42 +193,6 @@ export function LoginForm({
               <View style={styles.arrowCircle}>
                 <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
               </View>
-            </TouchableOpacity>
-
-            {/* Divider: or continue with */}
-            <View style={styles.dividerContainer}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or continue with</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            {/* Social Buttons */}
-            {/* Continue with Google */}
-            <TouchableOpacity
-              accessibilityRole="button"
-              accessibilityLabel="Continue with Google"
-              activeOpacity={0.8}
-              onPress={onGoogleSignIn}
-              style={styles.socialButton}
-            >
-              <View style={styles.socialIconContainer}>
-                <Ionicons name="logo-google" size={20} color="#EA4335" />
-              </View>
-              <Text style={styles.socialButtonText}>Continue with Google</Text>
-            </TouchableOpacity>
-
-            {/* Continue with Apple */}
-            <TouchableOpacity
-              accessibilityRole="button"
-              accessibilityLabel="Continue with Apple"
-              activeOpacity={0.8}
-              onPress={onAppleSignIn}
-              style={styles.socialButton}
-            >
-              <View style={styles.socialIconContainer}>
-                <Ionicons name="logo-apple" size={22} color="#000000" />
-              </View>
-              <Text style={styles.socialButtonText}>Continue with Apple</Text>
             </TouchableOpacity>
           </View>
 
@@ -320,6 +292,10 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 1,
   },
+  inputWrapperError: {
+    borderColor: '#EF4444',
+    backgroundColor: '#FFFBFB',
+  },
   inputIcon: {
     marginRight: 12,
   },
@@ -342,20 +318,26 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#0F6FDE',
   },
-  errorBanner: {
+  noticeBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEE2E2',
-    paddingVertical: 8,
+    backgroundColor: '#FFFBEB',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    paddingVertical: 10,
     paddingHorizontal: 12,
-    borderRadius: 10,
-    marginBottom: 12,
+    borderRadius: 12,
+    marginBottom: 14,
   },
-  errorBannerText: {
-    color: '#D93025',
-    fontSize: 13,
-    marginLeft: 6,
+  noticeIcon: {
+    marginRight: 8,
+  },
+  noticeBannerText: {
     flex: 1,
+    color: '#92400E',
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
   },
   signInButton: {
     height: 52,
@@ -392,48 +374,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#0FB5AE',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 14,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#DDE7F3',
-  },
-  dividerText: {
-    marginHorizontal: 14,
-    fontSize: 13,
-    color: '#7C8BA0',
-    fontWeight: '500',
-  },
-  socialButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.2,
-    borderColor: '#D4E2F4',
-    height: 48,
-    borderRadius: 24,
-    marginBottom: 10,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  socialIconContainer: {
-    marginRight: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  socialButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#0F172A',
   },
   footerContainer: {
     flexDirection: 'row',

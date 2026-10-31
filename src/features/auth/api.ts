@@ -1,7 +1,7 @@
-import { authEndpoints } from '@/api/endpoints/auth';
+import { authEndpoints, AgentLoginRequest, AgentLoginResponse } from '@/api/endpoints/auth';
 
 export const authApi = {
-  sendOtp: authEndpoints.sendOtp,
-  verifyOtp: authEndpoints.verifyOtp,
-  refreshToken: authEndpoints.refreshToken,
+  loginAgent: authEndpoints.loginAgent,
 };
+
+export type { AgentLoginRequest, AgentLoginResponse };

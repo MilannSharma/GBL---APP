@@ -2,65 +2,58 @@ import { useState, useCallback } from 'react';
 import { storage } from '@/core/storage';
 import { authApi } from '../api';
 import { logger } from '@/core/logger';
+import { AppError } from '@/api/errors';
 
 export function useAuth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const requestOtp = useCallback(async (phone: string): Promise<boolean> => {
-    setLoading(true);
-    setError(null);
-    try {
-      await authApi.sendOtp(phone);
-      return true;
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to send OTP';
-      setError(message);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const loginWithOtp = useCallback(async (phone: string, otp: string): Promise<boolean> => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await authApi.verifyOtp(phone, otp);
-      await storage.setItem(storage.keys.AUTH_TOKEN, data.token);
-      await storage.setItem(storage.keys.REFRESH_TOKEN, data.refreshToken);
-      await storage.setItem(storage.keys.USER_PROFILE, JSON.stringify(data.agent));
-      return true;
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Invalid OTP. Please try again.';
-      setError(message);
-      logger.error('Login error', err);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   const loginWithCredentials = useCallback(
-    async (identifier: string, _password: string): Promise<boolean> => {
+    async (identifier: string, password: string): Promise<boolean> => {
       setLoading(true);
       setError(null);
       try {
-        // Authenticate credentials per P02 spec (stores token in secure store)
-        const mockToken = `auth_${Date.now()}`;
-        const mockAgent = {
-          id: 'agent_001',
-          name: identifier.includes('@') ? identifier.split('@')[0] : 'Milan Sharma',
-          phone: identifier,
-          assignedHospitalIds: ['hosp_001', 'hosp_002'],
-        };
-        await storage.setItem(storage.keys.AUTH_TOKEN, mockToken);
-        await storage.setItem(storage.keys.USER_PROFILE, JSON.stringify(mockAgent));
-        return true;
+        const cleanIdentifier = identifier.trim();
+        const isNumericPhone = /^\d{10}$/.test(cleanIdentifier);
+
+        const payload = isNumericPhone
+          ? { contact: Number(cleanIdentifier), password }
+          : { username: cleanIdentifier, password };
+
+        // Production-grade: Live API authentication only. Zero mock fallbacks.
+        const responseData = await authApi.loginAgent(payload);
+
+        if (responseData?.token) {
+          await storage.setItem(storage.keys.AUTH_TOKEN, responseData.token);
+          if (responseData.refreshToken) {
+            await storage.setItem(storage.keys.REFRESH_TOKEN, responseData.refreshToken);
+          }
+          if (responseData.account) {
+            // Already stripped of the password hash by the login schema.
+            await storage.setItem(storage.keys.USER_PROFILE, JSON.stringify(responseData.account));
+          }
+          return true;
+        }
+
+        setError('Authentication failed. No token received from server.');
+        return false;
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'Invalid credentials. Please try again.';
+        // User-friendly messages only — never expose backend error details
+        let message = 'Incorrect credentials. Please try again.';
+
+        if (err instanceof AppError) {
+          if (err.code === 'NETWORK_ERROR') {
+            message = 'Unable to connect. Please check your internet connection.';
+          } else if (err.code === 'FORBIDDEN') {
+            message = 'Account is inactive. Please contact support.';
+          }
+          // All other codes (UNAUTHORIZED, NOT_FOUND, VALIDATION_ERROR, etc.)
+          // keep the default friendly message — no backend details leaked
+        }
+
         setError(message);
-        logger.error('Login error', err);
+        // Use warn instead of error to avoid the red Metro error toast
+        logger.warn('Login failed', { code: err instanceof AppError ? err.code : 'UNKNOWN' });
         return false;
       } finally {
         setLoading(false);
@@ -68,6 +61,10 @@ export function useAuth() {
     },
     []
   );
+
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
 
   const logout = useCallback(async () => {
     await storage.removeItem(storage.keys.AUTH_TOKEN);
@@ -78,8 +75,7 @@ export function useAuth() {
   return {
     loading,
     error,
-    requestOtp,
-    loginWithOtp,
+    clearError,
     loginWithCredentials,
     logout,
   };

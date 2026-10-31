@@ -28,15 +28,18 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     android: {
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
-        backgroundColor: '#0F6FDE',
+        backgroundColor: '#FFFFFF',
       },
       package: `com.gblh.fieldagent${suffix}`,
+      // Never hard-coded: local builds read it from the git-ignored .env, EAS builds from the
+      // GOOGLE_MAPS_ANDROID_KEY secret. Not prefixed EXPO_PUBLIC_, so it is not bundled into the JS.
+      config: {
+        googleMaps: { apiKey: process.env.GOOGLE_MAPS_ANDROID_KEY },
+      },
       permissions: [
         'ACCESS_COARSE_LOCATION',
         'ACCESS_FINE_LOCATION',
         'CAMERA',
-        'READ_EXTERNAL_STORAGE',
-        'WRITE_EXTERNAL_STORAGE',
       ],
     },
     plugins: [

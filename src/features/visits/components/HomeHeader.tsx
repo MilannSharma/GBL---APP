@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingLeft: 14,
+    paddingLeft: 20,
     paddingRight: 20,
     paddingTop: 8,
     paddingBottom: 6,
@@ -64,8 +64,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   logo: {
-    width: 175,
-    height: 54,
+    width: 145,
+    height: 58,
   },
   bellButton: {
     width: 44,

@@ -14,11 +14,12 @@ Docs: `docs/` (source of truth for product, features, pages, API, security)
 2. **Never lose agent data.** Offline-first. Every write goes to the local DB and outbox before the network. Data loss is a P0 bug.
 3. **Never leak sensitive data.** No tokens, passwords, patient data, or full payloads in logs, Sentry, analytics, commits, or screenshots.
 4. **No secrets in code.** `EXPO_PUBLIC_*` is public. Secrets live in EAS secrets / CI only.
-5. **Backend owns business rules.** The app validates for UX, the server decides. Never invent API fields or endpoints. Use `docs/07-api/`. If the API doc is blank, use the mock layer and mark the code `// TODO(api)`.
+5. **Backend owns business rules & NO MOCK APIS.** The app validates for UX, the server decides. Never invent API fields or endpoints. Use `docs/07-api/`. Never create fake or mock bypass fallbacks. If an endpoint or schema is missing, stop, ask the human owner, document it, and only then proceed.
 6. **Small, reversible changes.** One feature or screen per branch and PR. No drive-by refactors.
 7. **Do not claim done without proof.** Run the verification commands (section 8) and show the output.
 8. **Ask when unsure.** A short question is cheaper than a wrong feature.
 9. **Plans on a dedicated page.** Always present plans on a dedicated page (Artifact or task file in `docs/08-project/tasks/`). Never dump long plans in the sidebar modal (`ask_question`) or directly in chat. Always ask for user approval before implementing any plan.
+10. **Real Production-Grade App — ZERO Mocks & Zero Assumptions.** This is a real production-grade enterprise application. Never build mock data, mock responses, or bypass fallbacks. If any API, payload, design detail, or requirement is missing or unclear, stop and ask the user for clarification before writing code. Take full understanding first, satisfy all questions, and proceed with zero assumptions.
 
 ---
 

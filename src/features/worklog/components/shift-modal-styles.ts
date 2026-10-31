@@ -1,0 +1,112 @@
+import { Platform, StyleSheet } from 'react-native';
+import { colors, radii, spacing, typography } from '@/core/theme';
+
+export const MIN_TOUCH_SIZE = 44;
+const FIELD_HEIGHT = 48;
+const SHEET_RADIUS = 28;
+
+/** Styles shared by the start/end shift modals and their field components. */
+export const shiftStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: colors.overlay,
+    justifyContent: 'flex-end',
+  },
+  backdrop: {
+    flex: 1,
+  },
+  card: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: SHEET_RADIUS,
+    borderTopRightRadius: SHEET_RADIUS,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+    paddingBottom: Platform.OS === 'ios' ? spacing.xxl : spacing.xl,
+    maxHeight: '92%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  grabber: {
+    width: 44,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#CBD5E1',
+    alignSelf: 'center',
+    marginBottom: spacing.md,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  headerIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: radii.full,
+    backgroundColor: colors.primarySoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.md,
+  },
+  headerTextGroup: { flex: 1 },
+  title: { ...typography.h2, color: colors.text },
+  subtitle: { ...typography.caption, color: colors.textMuted, marginTop: 2 },
+  closeButton: {
+    width: MIN_TOUCH_SIZE,
+    height: MIN_TOUCH_SIZE,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scrollBody: {
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
+  },
+  group: { marginBottom: spacing.lg },
+  label: { ...typography.captionMedium, color: colors.text, marginBottom: spacing.sm },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderWidth: 1.2,
+    borderColor: colors.border,
+    borderRadius: radii.card,
+    height: FIELD_HEIGHT,
+    paddingHorizontal: spacing.md,
+  },
+  inputIcon: { marginRight: spacing.sm },
+  textInput: { flex: 1, height: '100%', ...typography.body, color: colors.text },
+  unitText: { ...typography.captionMedium, color: colors.textMuted },
+  notice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.warningSoft,
+    borderWidth: 1,
+    borderColor: colors.warningBorder,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    borderRadius: radii.card,
+    marginBottom: spacing.md,
+  },
+  noticeIcon: { marginRight: spacing.sm },
+  noticeText: { flex: 1, ...typography.captionMedium, color: colors.warningText },
+  submitButton: {
+    minHeight: MIN_TOUCH_SIZE + 6,
+    borderRadius: radii.full,
+    backgroundColor: colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  submitButtonDisabled: { opacity: 0.7 },
+  submitIcon: { marginRight: spacing.sm },
+  submitText: { ...typography.bodyMedium, color: colors.white },
+});

@@ -13,41 +13,32 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   HospitalVisitCard,
   VisitsMetricsHeader,
-  VisitActionModal,
+  VisitsSearchInput,
+  VisitsSearchResults,
   CreateVisitModal,
   StartDayGuardModal,
   useHospitalVisits,
+  useVisitShiftGate,
+  HospitalEntity,
   HospitalVisit,
+  hospitalHref,
+  hospitalOfVisit,
 } from '@/features/visits';
+import { StartWorkShiftModal } from '@/features/worklog';
+import { t } from '@/core/i18n';
 
 export default function VisitsRoute() {
   const router = useRouter();
-  const {
-    visits,
-    visitedCount,
-    notVisitedCount,
-    selectedDate,
-    setSelectedDate,
-    statusFilter,
-    setStatusFilter,
-    sortBy,
-    setSortBy,
-    isDayStarted,
-    dayStartTime,
-    startDay,
-    endDay,
-    isLoading,
-    refetch,
-    addVisit,
-    updateVisit,
-    toggleStatus,
-  } = useHospitalVisits();
+  const { visits, visitedCount, totalCount, isLoading, isError, refetch } = useHospitalVisits();
+  const { isDayStarted, isDayEnded, startShift, isStarting, startError, clearStartError } = useVisitShiftGate();
 
-  const [activeVisit, setActiveVisit] = useState<HospitalVisit | null>(null);
   const [createModalVisible, setCreateModalVisible] = useState(false);
-  const [showGuardModal, setShowGuardModal] = useState(false);
-  const [guardAction, setGuardAction] = useState('record hospital visits');
+  const [showEndedModal, setShowEndedModal] = useState(false);
+  const [startModalVisible, setStartModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [prefillName, setPrefillName] = useState('');
+  const isSearching = searchTerm.trim().length > 0;
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -55,57 +46,43 @@ export default function VisitsRoute() {
     setRefreshing(false);
   };
 
-  // Guarded: Card Press
-  const handleCardPress = (item: HospitalVisit) => {
-    if (!isDayStarted) {
-      setGuardAction(`check in or view details for ${item.hospitalName}`);
-      setShowGuardModal(true);
-      return;
-    }
-    setActiveVisit(item);
+  const handleSelectEntity = (entity: HospitalEntity) => {
+    router.push(hospitalHref(entity));
   };
 
-  // Guarded: Create Visit Press
-  const handleCreateVisitPress = () => {
-    if (!isDayStarted) {
-      setGuardAction('schedule and add new hospital visits');
-      setShowGuardModal(true);
+  const handleOpenVisit = (visit: HospitalVisit) => {
+    const hospital = hospitalOfVisit(visit);
+    if (hospital) router.push(hospitalHref(hospital));
+  };
+
+  // An active shift is required to record visits: without one, the start-day form opens right here.
+  const handleCreateVisitPress = (name = '') => {
+    if (isDayEnded) {
+      setShowEndedModal(true);
       return;
     }
+    if (!isDayStarted) {
+      clearStartError();
+      setStartModalVisible(true);
+      return;
+    }
+    setPrefillName(name);
     setCreateModalVisible(true);
   };
 
-  // Day Status Pill Press
-  const handleDayStatusPress = () => {
-    if (!isDayStarted) {
-      setGuardAction('access your field route and hospital visits');
-      setShowGuardModal(true);
-    } else {
-      Alert.alert(
-        'Daily Duty Active',
-        `Your shift started at ${dayStartTime || '09:00 AM'}.\nCompleted visits: ${visitedCount} / ${visitedCount + notVisitedCount}`,
-        [
-          { text: 'Continue Duty', style: 'default' },
-          {
-            text: 'End Shift for Today',
-            style: 'destructive',
-            onPress: () => endDay(),
-          },
-        ]
-      );
+  const handleVisitSaved = ({ hasSelfie }: { hasSelfie: boolean }) => {
+    setSearchTerm('');
+    if (!hasSelfie) {
+      Alert.alert(t('visits.add.title'), t('visits.add.selfieMissingNotice'));
     }
-  };
-
-  const handleStartCheckIn = (visitId: string) => {
-    setActiveVisit(null);
-    router.push(`/visit/${visitId}/check-in`);
   };
 
   return (
     <View style={styles.screenContainer}>
       {/* Hospital Visits List */}
       <FlatList
-        data={visits}
+        data={isSearching ? [] : visits}
+        keyboardShouldPersistTaps="handled"
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
@@ -118,105 +95,81 @@ export default function VisitsRoute() {
           />
         }
         ListHeaderComponent={
-          <VisitsMetricsHeader
-            visitedCount={visitedCount}
-            notVisitedCount={notVisitedCount}
-            selectedDate={selectedDate}
-            onSelectDate={(date) => setSelectedDate(date)}
-            isDayStarted={isDayStarted}
-            dayStartTime={dayStartTime}
-            onDayStatusPress={handleDayStatusPress}
-            statusFilter={statusFilter}
-            onSelectStatusFilter={(filter) => setStatusFilter(filter)}
-            sortBy={sortBy}
-            onSelectSortBy={(sort) => setSortBy(sort)}
-          />
+          <View>
+            <VisitsMetricsHeader
+              visitedCount={visitedCount}
+              totalVisits={totalCount}
+            />
+            <VisitsSearchInput value={searchTerm} onChange={setSearchTerm} />
+          </View>
         }
         renderItem={({ item }) => (
           <View style={styles.cardPadding}>
             <HospitalVisitCard
               visit={item}
-              onPress={() => handleCardPress(item)}
+              onPress={() => handleOpenVisit(item)}
             />
           </View>
         )}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconCircle}>
-              <Ionicons name="calendar-outline" size={38} color="#94A3B8" />
+          isSearching ? (
+            <VisitsSearchResults
+              term={searchTerm}
+              onSelectEntity={handleSelectEntity}
+            />
+          ) : (
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyIconCircle}>
+                <Ionicons name="business-outline" size={38} color="#94A3B8" />
+              </View>
+              {isError ? (
+                <Text style={styles.emptySubtitle}>{t('visits.list.error')}</Text>
+              ) : (
+                <>
+                  <Text style={styles.emptyTitle}>{t('visits.list.emptyTitle')}</Text>
+                  <Text style={styles.emptySubtitle}>{t('visits.list.emptyBody')}</Text>
+                </>
+              )}
             </View>
-            <Text style={styles.emptyTitle}>
-              {statusFilter === 'visited'
-                ? 'No Completed Visits'
-                : statusFilter === 'not_visited'
-                ? 'No Pending Visits'
-                : 'No Visits Scheduled'}
-            </Text>
-            <Text style={styles.emptySubtitle}>
-              {statusFilter === 'visited'
-                ? 'You have not marked any hospital as visited yet for this date.'
-                : statusFilter === 'not_visited'
-                ? 'All scheduled visits for this date have been completed!'
-                : `There are no hospital visits for ${selectedDate}. Tap below to schedule a new visit.`}
-            </Text>
-            <TouchableOpacity
-              style={styles.emptyButton}
-              onPress={handleCreateVisitPress}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="add" size={18} color="#FFFFFF" style={{ marginRight: 6 }} />
-              <Text style={styles.emptyButtonText}>Create New Visit</Text>
-            </TouchableOpacity>
-          </View>
+          )
         }
       />
 
-      {/* Floating Action Button: + Create Visit */}
+      {/* Floating Action Button: + Add Visit */}
       <TouchableOpacity
         style={styles.fabButton}
-        onPress={handleCreateVisitPress}
+        onPress={() => handleCreateVisitPress(searchTerm.trim())}
         activeOpacity={0.85}
         accessibilityRole="button"
-        accessibilityLabel="Create Visit"
+        accessibilityLabel="Add Visit"
       >
         <Ionicons name="add" size={20} color="#FFFFFF" style={styles.fabIcon} />
-        <Text style={styles.fabText}>Create Visit</Text>
+        <Text style={styles.fabText}>Add Visit</Text>
       </TouchableOpacity>
 
-      {/* Mandatory Day Start Guard Modal */}
+      {/* Day already ended: a shift runs once per day */}
       <StartDayGuardModal
-        visible={showGuardModal}
-        actionAttempted={guardAction}
-        onClose={() => setShowGuardModal(false)}
-        onStartDay={() => startDay()}
+        visible={showEndedModal}
+        isDayEnded
+        onClose={() => setShowEndedModal(false)}
       />
 
-      {/* Interactive Visit Action & Details Modal */}
-      <VisitActionModal
-        visible={!!activeVisit}
-        visit={activeVisit}
-        onClose={() => setActiveVisit(null)}
-        onToggleStatus={async (id) => {
-          await toggleStatus(id);
-          setActiveVisit(null);
-        }}
-        onUpdateVisit={async (id, updates) => {
-          await updateVisit({ id, updates });
-          if (activeVisit && activeVisit.id === id) {
-            setActiveVisit({ ...activeVisit, ...updates });
-          }
-        }}
-        onStartCheckIn={handleStartCheckIn}
+      {/* Day not started: start it here, then Add Visit is available */}
+      <StartWorkShiftModal
+        visible={startModalVisible}
+        onClose={() => setStartModalVisible(false)}
+        onSubmit={startShift}
+        loading={isStarting}
+        serverError={startError}
+        subtitle={t('visits.add.startDayFirst')}
       />
 
-      {/* Create New Hospital Visit Modal */}
+      {/* Add Hospital Visit */}
       <CreateVisitModal
         visible={createModalVisible}
+        initialName={prefillName}
         onClose={() => setCreateModalVisible(false)}
-        onAddVisit={async (newVisit) => {
-          await addVisit(newVisit);
-        }}
-        defaultDate={selectedDate.includes(',') ? selectedDate.split(',')[1].trim() : selectedDate}
+        onSaved={handleVisitSaved}
       />
     </View>
   );
@@ -285,18 +238,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
     marginBottom: 16,
-  },
-  emptyButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#0E70E3',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 14,
-  },
-  emptyButtonText: {
-    color: '#FFFFFF',
-    fontSize: 13.5,
-    fontWeight: '600',
   },
 });

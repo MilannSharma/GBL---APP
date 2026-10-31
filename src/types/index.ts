@@ -33,10 +33,15 @@ export interface Hospital {
   contactPhone?: string;
 }
 
+/** The agent as returned by login and kept in secure store. Never holds the password. */
 export interface AgentProfile {
-  id: string;
+  _id: string;
   name: string;
-  phone: string;
-  email?: string;
-  assignedHospitalIds: string[];
+  code?: string | null;
+  username?: string | null;
+  contact?: number | string | null;
+  email?: string | null;
+  isManager?: boolean | null;
+  isActive?: boolean | null;
+  assignedStates?: string[] | null;
 }

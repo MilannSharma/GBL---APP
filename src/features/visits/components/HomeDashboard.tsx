@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   View,
+  Text,
   ScrollView,
   RefreshControl,
   StyleSheet,
@@ -8,15 +9,24 @@ import {
   StatusBar,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { HomeHeader } from './HomeHeader';
 import { HomeWelcomeBanner } from './HomeWelcomeBanner';
 import { HomeHeroCard } from './HomeHeroCard';
-import { HomeQuickActions } from './HomeQuickActions';
-import { HomeOverviewCard } from './HomeOverviewCard';
-import { useDaySessionStore } from '../store/useDaySessionStore';
+import { TodayActivityTimeline } from './TodayActivityTimeline';
+import { HospitalVisit } from '../types';
+import { hospitalHref, hospitalOfVisit } from '../navigation';
+import { useWorklogDaySync } from '../hooks/useWorklogDaySync';
+import { colors, spacing, typography } from '@/core/theme';
+import {
+  useWorklog,
+  StartWorkShiftModal,
+  EndWorkShiftModal,
+} from '@/features/worklog';
 
 export interface HomeDashboardProps {
   userName?: string;
+  visits?: HospitalVisit[];
   visitedCount?: number;
   totalVisits?: number;
   onRefresh?: () => Promise<void> | void;
@@ -25,24 +35,52 @@ export interface HomeDashboardProps {
 
 export function HomeDashboard({
   userName = 'Sajibur Rahman',
+  visits = [],
   visitedCount = 0,
   totalVisits = 0,
   onRefresh,
   isLoading = false,
 }: HomeDashboardProps) {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
-  const { isDayStarted, startDay, endDay } = useDaySessionStore();
+  const [startModalVisible, setStartModalVisible] = useState(false);
+  const [endModalVisible, setEndModalVisible] = useState(false);
+
+  const {
+    todayWorklog,
+    isDayStarted,
+    isDayEnded,
+    dayStartTime,
+    dayEndTime,
+    startShift,
+    endShift,
+    submitting,
+    error: worklogError,
+    clearError,
+    fetchTodayWorklog,
+    loadState,
+    loadError,
+  } = useWorklog();
+
+  useWorklogDaySync({
+    hasLoaded: loadState === 'ready',
+    isDayStarted,
+    isDayEnded,
+    dayStartTime,
+  });
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    if (onRefresh) {
-      await onRefresh();
+    try {
+      await Promise.all([
+        onRefresh ? onRefresh() : Promise.resolve(),
+        fetchTodayWorklog(),
+      ]);
+    } finally {
+      setRefreshing(false);
     }
-    setRefreshing(false);
   };
-
-  const notVisitedCount = Math.max(0, totalVisits - visitedCount);
 
   // Status bar offset
   const topPadding = Platform.OS === 'android' ? Math.max(insets.top, StatusBar.currentHeight || 0) + 12 : insets.top;
@@ -70,24 +108,61 @@ export function HomeDashboard({
         {/* Welcome Section with Doctor Illustration */}
         <HomeWelcomeBanner userName={userName} />
 
+        {loadError ? (
+          <Text style={styles.loadError} accessibilityRole="alert">
+            {loadError}
+          </Text>
+        ) : null}
+
         {/* Today's Visit Hero Card */}
         <HomeHeroCard
           visitedCount={visitedCount}
           totalVisits={totalVisits}
           isDayStarted={isDayStarted}
-          onToggleDay={(started) => (started ? startDay() : endDay())}
+          isDayEnded={isDayEnded}
+          isStatusLoading={loadState !== 'ready'}
+          dayStartTime={dayStartTime}
+          dayEndTime={dayEndTime}
+          onPressStartDay={() => {
+            clearError();
+            setStartModalVisible(true);
+          }}
+          onPressEndDay={() => {
+            clearError();
+            setEndModalVisible(true);
+          }}
         />
 
-        {/* Quick Actions Shortcuts */}
-        <HomeQuickActions />
-
-        {/* Today's Overview Metrics */}
-        <HomeOverviewCard
-          visitedCount={visitedCount}
-          notVisitedCount={notVisitedCount}
+        {/* Today's Activity Timeline Trail */}
+        <TodayActivityTimeline
+          visits={visits}
           isDayStarted={isDayStarted}
+          dayStartTime={dayStartTime}
+          onPressVisit={(visit) => {
+            const hospital = hospitalOfVisit(visit);
+            if (hospital) router.push(hospitalHref(hospital));
+          }}
         />
       </ScrollView>
+
+      {/* Start Work Shift Modal */}
+      <StartWorkShiftModal
+        visible={startModalVisible}
+        onClose={() => setStartModalVisible(false)}
+        onSubmit={startShift}
+        loading={submitting}
+        serverError={worklogError}
+      />
+
+      {/* End Work Shift Modal */}
+      <EndWorkShiftModal
+        visible={endModalVisible}
+        onClose={() => setEndModalVisible(false)}
+        onSubmit={endShift}
+        initialReading={todayWorklog?.initialReading}
+        loading={submitting}
+        serverError={worklogError}
+      />
     </View>
   );
 }
@@ -99,5 +174,14 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+  },
+  loadError: {
+    ...typography.captionMedium,
+    color: colors.warningText,
+    backgroundColor: colors.warningSoft,
+    marginHorizontal: spacing.screenPadding,
+    marginBottom: spacing.md,
+    padding: spacing.md,
+    borderRadius: 12,
   },
 });

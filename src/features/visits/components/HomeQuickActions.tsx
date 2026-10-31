@@ -22,9 +22,9 @@ const DEFAULT_ACTIONS: QuickActionItem[] = [
     route: '/(tabs)/profile',
   },
   {
-    id: 'schedule',
-    title: 'Schedule\n',
-    icon: 'calendar',
+    id: 'add-visit',
+    title: 'Add\nVisit',
+    icon: 'add-circle',
     iconColor: '#7C3AED',
     bgColor: '#F4F0FF',
     route: '/(tabs)/visits',

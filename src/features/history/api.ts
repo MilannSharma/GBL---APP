@@ -1,5 +1,2 @@
-import { visitsEndpoints } from '@/api/endpoints/visits';
-
-export const historyApi = {
-  getAllVisits: visitsEndpoints.getAllVisits,
-};
+// TODO(TASK-019): history will read GET /api/v1/agent/visit with a date range once its page spec is confirmed.
+export const historyApi = {};

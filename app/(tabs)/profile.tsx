@@ -1,7 +1,6 @@
 import React from 'react';
+import { SafeAreaView, StyleSheet, Platform, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Screen } from '@/components/Screen';
-import { Header } from '@/components/Header';
 import { LoadingView } from '@/components/LoadingView';
 import { EmptyState } from '@/components/EmptyState';
 import { ProfileDetails, useProfile } from '@/features/profile';
@@ -18,8 +17,8 @@ export default function ProfileRoute() {
   };
 
   return (
-    <Screen>
-      <Header title="My Profile" />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" />
       {loading ? (
         <LoadingView message="Loading profile..." />
       ) : profile ? (
@@ -32,6 +31,14 @@ export default function ProfileRoute() {
           onAction={() => router.replace('/(auth)/login')}
         />
       )}
-    </Screen>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F8FBFE',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+  },
+});
