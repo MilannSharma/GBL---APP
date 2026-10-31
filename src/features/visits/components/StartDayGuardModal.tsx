@@ -5,7 +5,10 @@ import { Ionicons } from '@expo/vector-icons';
 export interface StartDayGuardModalProps {
   visible: boolean;
   onClose: () => void;
-  onStartDay: () => void;
+  /** Omit when the day cannot be started from here; the start button is then not shown. */
+  onStartDay?: () => void;
+  /** Today's shift already ended: a shift runs only once per day, so offer no restart. */
+  isDayEnded?: boolean;
   actionAttempted?: string; // e.g. "record visits" or "add a new visit"
 }
 
@@ -14,9 +17,10 @@ export function StartDayGuardModal({
   onClose,
   onStartDay,
   actionAttempted = 'record hospital visits',
+  isDayEnded = false,
 }: StartDayGuardModalProps) {
   const handleStart = () => {
-    onStartDay();
+    onStartDay?.();
     onClose();
   };
 
@@ -43,12 +47,17 @@ export function StartDayGuardModal({
           </View>
 
           {/* Title and Message */}
-          <Text style={styles.title}>Please Start Your Day First</Text>
+          <Text style={styles.title}>
+            {isDayEnded ? 'Your Shift Has Ended' : 'Please Start Your Day First'}
+          </Text>
           <Text style={styles.message}>
-            You must start your daily duty shift before you can {actionAttempted}, perform check-ins, or schedule new hospitals.
+            {isDayEnded
+              ? 'You have already completed the shift for today. A shift can be started and ended only once per day.'
+              : `You must start your daily duty shift before you can ${actionAttempted}, perform check-ins, or schedule new hospitals.`}
           </Text>
 
           {/* Action Buttons */}
+          {isDayEnded || !onStartDay ? null : (
           <TouchableOpacity
             style={styles.startDayButton}
             onPress={handleStart}
@@ -59,6 +68,7 @@ export function StartDayGuardModal({
             <Ionicons name="play-circle" size={20} color="#FFFFFF" style={styles.buttonIcon} />
             <Text style={styles.startDayButtonText}>Start Day Now</Text>
           </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             style={styles.cancelButton}
@@ -67,7 +77,7 @@ export function StartDayGuardModal({
             accessibilityRole="button"
             accessibilityLabel="Cancel"
           >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+            <Text style={styles.cancelButtonText}>{isDayEnded ? 'Close' : 'Cancel'}</Text>
           </TouchableOpacity>
         </View>
       </View>

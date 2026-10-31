@@ -23,11 +23,11 @@ export function HomeWelcomeBanner({
         <Text style={styles.quoteText}>{quote}</Text>
       </View>
 
-      {/* Right doctor illustration */}
+      {/* Right field agent illustration */}
       <View style={styles.illustrationWrapper}>
         <Image
-          source={require('../../../../assets/doctor-illustration.png')}
-          style={styles.doctorImage}
+          source={require('../../../../assets/agent-illustration.png')}
+          style={styles.agentImage}
           resizeMode="contain"
           accessibilityLabel="Medical Field Agent"
         />
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: -10,
   },
-  doctorImage: {
+  agentImage: {
     width: 175,
     height: 165,
   },

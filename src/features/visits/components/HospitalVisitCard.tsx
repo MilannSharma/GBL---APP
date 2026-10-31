@@ -57,15 +57,15 @@ export function HospitalVisitCard({ visit, onPress }: HospitalVisitCardProps) {
 
       {/* Right Column: Status Badge & Chevron */}
       <View style={styles.rightCol}>
-        <View style={[styles.statusBadge, isVisited ? styles.badgeVisited : styles.badgeNotVisited]}>
+        <View style={[styles.statusBadge, styles.badgeVisited]}>
           <Ionicons
-            name={isVisited ? 'checkmark-circle' : 'time-outline'}
+            name="checkmark-circle"
             size={12}
-            color={isVisited ? '#10B981' : '#0E70E3'}
+            color="#10B981"
             style={styles.badgeIcon}
           />
-          <Text style={[styles.statusText, isVisited ? styles.textVisited : styles.textNotVisited]}>
-            {isVisited ? 'Visited' : 'Not Yet Visited'}
+          <Text style={[styles.statusText, styles.textVisited]}>
+            Visited
           </Text>
         </View>
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/core/theme/colors';
 import { spacing } from '@/core/theme/spacing';
 import { typography } from '@/core/theme/typography';
@@ -21,8 +22,9 @@ export function Header({ title, subtitle, onBack, rightAction }: HeaderProps) {
             accessibilityLabel="Go back"
             onPress={onBack}
             style={styles.backButton}
+            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
           >
-            <Text style={styles.backText}>←</Text>
+            <Ionicons name="arrow-back" size={24} color={colors.primary} />
           </TouchableOpacity>
         )}
         <View>

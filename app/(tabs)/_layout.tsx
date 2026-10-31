@@ -50,23 +50,23 @@ function FloatingTabBar({ state, navigateToTab }: FloatingTabBarProps) {
             />
           ),
         };
+      case 'history':
+        return {
+          label: 'Expense',
+          renderIcon: () => (
+            <Ionicons
+              name={isFocused ? 'wallet' : 'wallet-outline'}
+              size={20}
+              color={isFocused ? '#0E70E3' : '#94A3B8'}
+            />
+          ),
+        };
       case 'profile':
         return {
           label: 'Profile',
           renderIcon: () => (
             <Feather
               name="user"
-              size={20}
-              color={isFocused ? '#0E70E3' : '#94A3B8'}
-            />
-          ),
-        };
-      case 'history':
-        return {
-          label: 'More',
-          renderIcon: () => (
-            <Feather
-              name="more-horizontal"
               size={20}
               color={isFocused ? '#0E70E3' : '#94A3B8'}
             />
@@ -81,12 +81,12 @@ function FloatingTabBar({ state, navigateToTab }: FloatingTabBarProps) {
   };
 
   const handleCenterFabPress = () => {
-    router.push('/(tabs)/visits');
+    router.push('/map');
   };
 
   // Split tabs around center button
   const leftRoutes = state.routes.slice(0, 2); // index (Home), visits (Visits)
-  const rightRoutes = state.routes.slice(2, 4); // profile (Profile), history (More)
+  const rightRoutes = state.routes.slice(2, 4); // history (Expense), profile (Profile)
 
   return (
     <View style={styles.tabBarContainer}>
@@ -125,20 +125,20 @@ function FloatingTabBar({ state, navigateToTab }: FloatingTabBarProps) {
         );
       })}
 
-      {/* Center Floating Action Button (FAB) */}
+      {/* Center Floating Action Button (FAB): Visits Map */}
       <View style={styles.fabWrapper}>
         <TouchableOpacity
           style={styles.centerFab}
           onPress={handleCenterFabPress}
           accessibilityRole="button"
-          accessibilityLabel="Quick Check-in route"
+          accessibilityLabel="Visits Map"
           activeOpacity={0.85}
         >
-          <Ionicons name="git-network-outline" size={24} color="#FFFFFF" />
+          <Ionicons name="map" size={24} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
-      {/* Right Routes: Profile & More */}
+      {/* Right Routes: Expense & Profile */}
       {rightRoutes.map((route: TabRoute, idx: number) => {
         const actualIndex = idx + 2;
         const isFocused = state.index === actualIndex;
@@ -198,15 +198,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="history"
         options={{
-          title: 'Profile',
+          title: 'Expense',
         }}
       />
       <Tabs.Screen
-        name="history"
+        name="profile"
         options={{
-          title: 'More',
+          title: 'Profile',
         }}
       />
     </Tabs>

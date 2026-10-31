@@ -8,6 +8,13 @@ export interface HomeHeroCardProps {
   visitedCount?: number;
   totalVisits?: number;
   isDayStarted?: boolean;
+  isDayEnded?: boolean;
+  /** True until the server shift status is known; blocks Start/End so a stale state cannot be acted on. */
+  isStatusLoading?: boolean;
+  dayStartTime?: string;
+  dayEndTime?: string;
+  onPressStartDay?: () => void;
+  onPressEndDay?: () => void;
   onToggleDay?: (started: boolean) => void;
   onPressCard?: () => void;
 }
@@ -15,16 +22,42 @@ export interface HomeHeroCardProps {
 export function HomeHeroCard({
   visitedCount = 0,
   totalVisits = 0,
+  isDayStarted: propIsDayStarted,
+  isDayEnded = false,
+  isStatusLoading = false,
+  dayStartTime: propDayStartTime,
+  dayEndTime,
+  onPressStartDay,
+  onPressEndDay,
+  onToggleDay,
   onPressCard,
 }: HomeHeroCardProps) {
   const router = useRouter();
-  const { isDayStarted, dayStartTime, startDay, endDay } = useDaySessionStore();
+  const sessionStore = useDaySessionStore();
 
-  const handleToggleDay = () => {
+  const isDayStarted = propIsDayStarted !== undefined ? propIsDayStarted : sessionStore.isDayStarted;
+  const dayStartTime = propDayStartTime !== undefined ? propDayStartTime : sessionStore.dayStartTime;
+
+  const handleActionPress = () => {
+    if (isDayEnded || isStatusLoading) {
+      return;
+    }
     if (isDayStarted) {
-      endDay();
+      if (onPressEndDay) {
+        onPressEndDay();
+      } else if (onToggleDay) {
+        onToggleDay(false);
+      } else {
+        sessionStore.endDay();
+      }
     } else {
-      startDay();
+      if (onPressStartDay) {
+        onPressStartDay();
+      } else if (onToggleDay) {
+        onToggleDay(true);
+      } else {
+        sessionStore.startDay();
+      }
     }
   };
 
@@ -56,7 +89,7 @@ export function HomeHeroCard({
           </View>
 
           <View style={styles.visitTextGroup}>
-            <Text style={styles.todayVisitLabel}>Today's Visit</Text>
+            <Text style={styles.todayVisitLabel}>Today&apos;s Visit</Text>
             <View style={styles.countRow}>
               <Text style={styles.countNumber}>{visitedCount}</Text>
               <Text style={styles.visitedLabel}> visited</Text>
@@ -73,12 +106,20 @@ export function HomeHeroCard({
       {/* Divider */}
       <View style={styles.divider} />
 
-      {/* Bottom row: Day status & Start Day button */}
+      {/* Bottom row: Day status & Start/End Day button */}
       <View style={styles.bottomSection}>
         <View style={styles.statusLeft}>
-          <Feather name={isDayStarted ? 'check-circle' : 'clock'} size={16} color="rgba(255, 255, 255, 0.9)" />
+          <Feather
+            name={isDayEnded ? 'check-circle' : isDayStarted ? 'clock' : 'moon'}
+            size={16}
+            color="rgba(255, 255, 255, 0.9)"
+          />
           <Text style={styles.statusText}>
-            {isDayStarted
+            {isDayEnded
+              ? dayEndTime
+                ? `Shift completed (${dayEndTime})`
+                : 'Shift completed for today'
+              : isDayStarted
               ? dayStartTime
                 ? `Day in progress (${dayStartTime})`
                 : 'Day in progress'
@@ -87,22 +128,43 @@ export function HomeHeroCard({
         </View>
 
         <TouchableOpacity
-          style={styles.startDayButton}
-          onPress={handleToggleDay}
+          style={[
+            styles.startDayButton,
+            isDayEnded && styles.dayEndedButton,
+            isStatusLoading && !isDayEnded && styles.statusLoadingButton,
+          ]}
+          onPress={handleActionPress}
+          disabled={isDayEnded || isStatusLoading}
           accessibilityRole="button"
-          accessibilityLabel={isDayStarted ? 'End Day' : 'Start Day'}
+          accessibilityState={{ disabled: isDayEnded || isStatusLoading }}
+          accessibilityLabel={isDayEnded ? 'Shift Completed' : isDayStarted ? 'End Day' : 'Start Day'}
           activeOpacity={0.85}
         >
-          <View style={styles.playCircle}>
+          <View
+            style={[
+              styles.playCircle,
+              isDayEnded
+                ? styles.endedCircle
+                : isDayStarted
+                ? styles.stopCircle
+                : styles.startCircle,
+            ]}
+          >
             <Ionicons
-              name={isDayStarted ? 'stop' : 'play'}
+              name={isDayEnded ? 'checkmark' : isDayStarted ? 'stop' : 'play'}
               size={12}
               color="#FFFFFF"
-              style={{ marginLeft: isDayStarted ? 0 : 2 }}
+              style={{ marginLeft: !isDayEnded && !isDayStarted ? 2 : 0 }}
             />
           </View>
-          <Text style={styles.startDayText}>
-            {isDayStarted ? 'End Day' : 'Start Day'}
+          <Text
+            style={[
+              styles.startDayText,
+              isDayEnded && styles.dayEndedText,
+              isDayStarted && !isDayEnded && styles.endDayText,
+            ]}
+          >
+            {isDayEnded ? 'Shift Ended' : isDayStarted ? 'End Day' : 'Start Day'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -198,6 +260,9 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.9)',
     marginLeft: 8,
   },
+  statusLoadingButton: {
+    opacity: 0.6,
+  },
   startDayButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -211,18 +276,36 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
+  dayEndedButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    opacity: 0.8,
+  },
   playCircle: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#0E70E3',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 8,
+  },
+  startCircle: {
+    backgroundColor: '#0E70E3',
+  },
+  stopCircle: {
+    backgroundColor: '#EF4444',
+  },
+  endedCircle: {
+    backgroundColor: '#10B981',
   },
   startDayText: {
     fontSize: 14,
     fontWeight: '700',
     color: '#0E70E3',
+  },
+  endDayText: {
+    color: '#DC2626',
+  },
+  dayEndedText: {
+    color: '#059669',
   },
 });

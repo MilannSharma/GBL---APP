@@ -5,11 +5,7 @@ export function useTodayVisits() {
   const query = useQuery<LocalVisit[], Error>({
     queryKey: ['visits', 'today'],
     queryFn: async () => {
-      // 1. Fetch instantly from local SQLite DB
-      const local = await visitsRepo.getTodayVisits();
-      // 2. Trigger asynchronous background sync from API (non-blocking)
-      visitsRepo.refreshTodayVisitsFromApi().catch(() => {});
-      return local;
+      return visitsRepo.getTodayVisits();
     },
   });
 

@@ -2,6 +2,16 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { config } from '@/core/config';
 import { storage } from '@/core/storage';
 import { AppError } from './errors';
+import { notifyUnauthorized } from './session';
+
+/** Nest answers `{ statusCode, message, error }`; `message` is a string[] for DTO validation errors. */
+function extractMessage(body: Record<string, unknown> | undefined): string | undefined {
+  const raw = body?.message ?? body?.error ?? body?.msg;
+  if (Array.isArray(raw)) {
+    return raw.filter((item): item is string => typeof item === 'string').join('\n') || undefined;
+  }
+  return typeof raw === 'string' ? raw : undefined;
+}
 
 export const apiClient = axios.create({
   baseURL: config.apiUrl,
@@ -36,11 +46,14 @@ apiClient.interceptors.response.use(
 
     const { status, data } = error.response;
     const responseData = data as Record<string, unknown> | undefined;
-    const message = (responseData?.message as string) || error.message || 'An error occurred';
+    const message = extractMessage(responseData) || error.message || 'An error occurred';
 
     if (status === 401) {
-      // Clear token and trigger logout if necessary
+      // The token is dead: wipe the session and send the user back to login.
       await storage.removeItem(storage.keys.AUTH_TOKEN);
+      await storage.removeItem(storage.keys.REFRESH_TOKEN);
+      await storage.removeItem(storage.keys.USER_PROFILE);
+      notifyUnauthorized();
       return Promise.reject(new AppError('UNAUTHORIZED', message));
     }
 
@@ -57,7 +70,13 @@ apiClient.interceptors.response.use(
     }
 
     if (status >= 500) {
-      return Promise.reject(new AppError('SERVER_ERROR', 'Server error. Please try again later.'));
+      const serverMessage = (responseData?.message as string) || (responseData?.error as string) || 'Server error. Please try again later.';
+      return Promise.reject(
+        new AppError('SERVER_ERROR', serverMessage, {
+          status,
+          body: typeof data === 'string' ? data.slice(0, 300) : data,
+        })
+      );
     }
 
     return Promise.reject(new AppError('UNKNOWN_ERROR', message));

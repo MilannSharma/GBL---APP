@@ -29,6 +29,12 @@ Format: ID, date, decision, context, alternatives, consequences, status.
 ## ADR-007: Certificate pinning
 - **Status:** Open
 
+## ADR-008: Work day log (start/end shift) is online-only
+- **Status:** Accepted (product owner, 2026-10-29)
+- **Context:** `/api/v1/agent/worklog/start|end` require an odometer photo and GPS, and the server stamps the time. The owner wants no offline handling for this module.
+- **Decision:** Start/End shift call the API directly with no local DB write or outbox item. Failures (network, 4xx) are shown inline in the modal and the agent retries manually.
+- **Consequences:** An agent without connectivity cannot start or end a shift. This is a deliberate exception to AGENTS.md prime directive 2 and applies to the worklog module only.
+
 ## Template
 ```
 ## ADR-XXX: Title

@@ -1,8 +1,16 @@
-import React from 'react';
-import { Stack } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Stack, useRouter } from 'expo-router';
 import { AppProviders } from '@/core/providers';
+import { setUnauthorizedHandler } from '@/api/session';
 
 export default function RootLayout() {
+  const router = useRouter();
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => router.replace('/(auth)/login'));
+    return () => setUnauthorizedHandler(null);
+  }, [router]);
+
   return (
     <AppProviders>
       <Stack screenOptions={{ headerShown: false }}>
@@ -14,7 +22,6 @@ export default function RootLayout() {
         <Stack.Screen name="history/[id]" />
         <Stack.Screen name="notifications" />
         <Stack.Screen name="settings" />
-        <Stack.Screen name="sync" />
         <Stack.Screen name="system/update" />
       </Stack>
     </AppProviders>
