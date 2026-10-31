@@ -17,3 +17,4 @@ Please answer these. Update the docs after each answer.
 | 11 | Expected number of agents (100? 10,000?) | Scalability | | |
 | 12 | Launch date and team size? | Roadmap | | |
 | 13 | Is there patient data in the visit form? | Compliance (DPDP) | | |
+| 14 | Unclosed shift at midnight (IST): closed by a backend job or API setting? App does nothing for this (owner decision 2026-10-29). | Worklog, backend | Backend developer to handle server-side; app only rolls the UI over to the new day. | Backend dev |
